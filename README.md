@@ -1,2 +1,2 @@
 # myrepo
-my first repository for testing
+My repo for deploying kafka on Docker
