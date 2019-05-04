@@ -2,7 +2,8 @@
 - hosts: zookeeper
   roles:
   - role : kafka_users
-  - role : jdk_8u101_x64
-  - role : kafka_confluent
-  - role : kafka_zookeeper
+
+#  - role : jdk_8u101_x64
+#  - role : kafka_confluent
+#  - role : kafka_zookeeper
 
