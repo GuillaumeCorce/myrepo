@@ -5,14 +5,11 @@
     name : "{{kafka_user_app}}"
     shell : /bin/bash
     comment : kafka user for app
-    groups :
-  become : yes
+    groups : 
 
 - name : Add the kafka user for the data
   user :
     name : "{{kafka_user_data}}"
     shell : /bin/bash
     comment : kafka user for data
-    groups :
-  become : yes
-
+    groups : 

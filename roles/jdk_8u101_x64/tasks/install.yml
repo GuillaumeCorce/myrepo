@@ -1,0 +1,26 @@
+
+- name : Create group jdk
+  group : name={{vars_groupname}} gid={{vars_gid}} state=present
+
+- name : "Create user jdk"
+  user : name={{vars_username}} uid={{vars_uid}} group={{vars_groupname}} state=present
+
+- name : Copy the JDK source file
+  copy : src="{{jdk_src}}" dest="{{tmp_dir}}"
+
+- name : Create /bustools/jdk
+  file : path=/bustools/jdk owner=root group=root mode=0755 state=directory
+
+- name : Unarchive JDK file
+  unarchive: src="{{tmp_dir}}/{{jdk_src}}" dest="/bustools/jdk" copy=no
+
+- name : Remove jdk installation package
+  file : path="{{tmp_dir}}/{{jdk_src}}" state=absent
+
+- name : Adjust ownership
+  file : path="/bustools/jdk" owner={{vars_username}} group={{vars_groupname}} state=directory recurse=yes
+
+- name : Create the symbolic link
+  file : src="/bustools/jdk/jdk1.8.0_101" dest="/bustools/jdk/current" state=link
+
+

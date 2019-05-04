@@ -2,7 +2,8 @@
 - hosts: broker
   roles:
   - role : kafka_users
-#  - role : jdk_8u101_x64
+  - role : jdk_8u101_x64
+    mode : install
 #  - role : kafka_confluent
 #  - role : kafka_broker
 
