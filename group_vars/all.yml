@@ -1,0 +1,5 @@
+kafka_user_data : "{{env}}{{trigram}}{{deployment_code}}0"
+kafka_user_app : "{{env}}{{trigram}}{{deployment_code}}a"
+Kafka_apps_dir : "/busapps/{{kafka_user_data}}/kafka"
+Kafka_data_dir : "/busapps/{{kafka_user_data}}/kafka/data"
+
