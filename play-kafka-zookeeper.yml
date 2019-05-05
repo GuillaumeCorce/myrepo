@@ -4,6 +4,7 @@
   - role : kafka_users
   - role : jdk_8u101_x64
     mode : "install"
-#  - role : kafka_confluent
+  - role : kafka_confluent
+    mode : "install"
 #  - role : kafka_zookeeper
 

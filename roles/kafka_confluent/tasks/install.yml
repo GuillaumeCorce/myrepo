@@ -1,0 +1,49 @@
+
+
+- name : Copy the Confluent source file
+  copy : src="{{con_src}}" dest="{{tmp_dir}}"
+
+- name : Create directory for extract
+  file : path="{{tmp_dir}}/kafka" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0755 state=directory
+
+- name : Unarchive the Confluent file
+  unarchive: src="{{tmp_dir}}/{{con_src}}" dest="{{tmp_dir}}/kafka" copy=no
+
+# Installation dans le conteneur pour ne pas perdre de temps
+#- name : Install rsync
+#  apt : 
+#    name : rsync
+#    state : latest
+#    update_cache : yes
+
+- name : Adjust ownership
+  file : path="{{tmp_dir}}/kafka" owner={{kafka_user_app}} group={{kafka_user_data}} state=directory recurse=yes
+
+# Voir le pb du local
+#- name : Synchronize directory /bin
+#  synchronize : src="{{tmp_dir}}/{{ext_dir}}/bin" dest="/usr/bin" recursive=yes 
+#  delegate_to : zookeeper
+
+# Voir copy depuis le node ansible
+#- name : Copy directory /bin/* dans /usr/bin
+#  copy : src="{{tmp_dir}}/{{ext_dir}}/bin/" dest="/usr/bin" owner="{{kafka_user_app}}" group="{{kafka_user_data}}"
+
+- name : Copy directory /bin/* dans /usr/bin
+  shell : cp -rp "{{tmp_dir}}/{{ext_dir}}/bin/"* /usr/bin
+
+- name : Copy directory /etc/* dans /etc
+  shell : cp -rp "{{tmp_dir}}/{{ext_dir}}/etc/"* /etc
+
+- name : Copy directory /lib/* dans /lib
+  shell : cp -rp "{{tmp_dir}}/{{ext_dir}}/lib/"* /lib
+
+- name : Copy directory /share/* dans /usr/share
+  shell : cp -rp "{{tmp_dir}}/{{ext_dir}}/share/"* /usr/share
+
+- name : Remove Confluent installation package
+  file : path="{{tmp_dir}}/{{con_src}}" state=absent
+
+- name : Remove COnfluent extract directory
+  file : path="{{tmp_dir}}/{{ext_dir}}" state=absent
+
+

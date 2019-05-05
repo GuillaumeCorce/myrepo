@@ -1,9 +1,6 @@
 
-vars_role_name : "jdk_8u101_x64"
-vars_jdk_package : "/oracle/jdk/8u101/jdk-8u101-linux-x64.tar.gz"
-vars_groupname : "jdk"
-vars_gid : "16276"
-vars_username : "jdk"
-vars_uid : "16276"
-jdk_src : "jdk-8u101-linux-x64.tar.gz"
+con_src : "confluent-5.2.1-2.12.tar.gz"
 tmp_dir : "/usr/share/monpath"
+ext_dir : "kafka/confluent-5.2.1"
+tmp : "/tmp"
+
