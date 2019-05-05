@@ -1,0 +1,5 @@
+
+- hosts: broker
+  roles:
+  - role : debugj2
+
