@@ -1,0 +1,6 @@
+Server {
+   org.apache.kafka.common.security.scram.ScramLoginModule required
+   username="{{ kafka_jaas_user_client }}"
+   password="{{ kafka_jaas_password_client }}"
+   user_{{ kafka_jaas_user_client }}="{{ kafka_jaas_password_client }}";
+};

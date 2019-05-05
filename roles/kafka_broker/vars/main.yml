@@ -1,0 +1,7 @@
+kafka_env_dir : "/etc/system.d/system/confluent-kafka.service.d"
+kafka_conf_dir : "/etc/kafka"
+kafka_log_dir : "/busdata/{{env}}{{trigram}}/{{deployment_code}}0/kafka/logs"
+kafka_data_dir : "/busdata/{{env}}{{trigram}}/{{deployment_code}}0/kafka/broker"
+
+inter_broker_protocol_version: "2.1"
+log_message_format_version : "2.1"

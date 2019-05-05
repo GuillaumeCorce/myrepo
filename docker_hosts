@@ -1,12 +1,20 @@
-[zookeeper]
+[all]
 172.17.0.2
 172.17.0.3
 172.17.0.4
-
-[broker]
 172.17.0.5
 172.17.0.6
 172.17.0.7
+
+[zookeeper]
+172.17.0.2 host_id=1
+172.17.0.3 host_id=2
+172.17.0.4 host_id=3
+
+[broker]
+172.17.0.5 host_id=1
+172.17.0.6 host_id=2
+172.17.0.7 host_id=3
 
 [registry]
 

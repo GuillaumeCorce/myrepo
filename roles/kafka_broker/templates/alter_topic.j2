@@ -1,0 +1,40 @@
+#!/bin/sh
+echo "Starting altering topic"
+
+export JAVA_HOME=/bustools/jdk/current
+export KAFKA_OPTS=-Djava.security.auth.login.config="{{ kafka_conf_dir }}/kafka_server_jaas.conf"
+
+#read arguments from command line
+topic_name=$1
+param_key=$2
+param_value=$3
+delete_param=$4
+
+
+if [ "$#" -ne 4 ]; then
+  echo "One or more arguments is missing"
+  exit 1
+fi
+#replace var
+path_bin={{ kafka_bin_dir }}
+zookeeper_node={{ inventory_hostname }}
+zookeeper_port={{ kafka_zookeeper_port }}
+
+option=""
+if [ "$delete_param" = "true" ]; then
+	option="--alter --delete-config $param_key"
+else
+	option="--alter --add-config $param_key=$param_value"
+fi
+
+echo "executing alter topic command" $path_bin/kafka-configs --zookeeper $zookeeper_node:$zookeeper_port --entity-type topics --entity-name $topic_name $option
+	$path_bin/kafka-configs --zookeeper $zookeeper_node:$zookeeper_port --entity-type topics --entity-name $topic_name $option
+	
+	result=$?; 
+	if [[ $result != 0 ]]; 
+	then 
+		echo "an error occured"
+		exit $result; 
+	fi
+echo "Topic has been altered"
+exit 0

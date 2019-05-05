@@ -1,0 +1,5 @@
+
+- name : restart broker
+  command : "sh {{kafka_apps_dir}}/bin/kafka-service reload"
+  become : yes
+  become_user : "{{kafka_user_data}}"

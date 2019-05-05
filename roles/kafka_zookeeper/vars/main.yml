@@ -1,0 +1,5 @@
+
+zoo_env_dir : "/etc/system.d/system/confluent-zookeeper.service.d"
+zoo_conf_dir : "/etc/kafka"
+zoo_log_dir : "/busdata/{{env}}{{trigram}}/{{deployment_code}}0/kafka/logs"
+zoo_data_dir : "/busdata/{{env}}{{trigram}}/{{deployment_code}}0/kafka/zookeeper"

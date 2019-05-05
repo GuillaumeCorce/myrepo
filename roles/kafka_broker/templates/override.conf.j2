@@ -1,0 +1,9 @@
+[Service]
+Type=simple
+User={{ kafka_user_app }}
+Group={{ kafka_user_data }}
+LimitNOFILE=100000
+Environment="LOG_DIR={{ kafka_log_dir }}"
+Environment="JAVA_HOME=/bustools/jdk/current"
+Environment="KAFKA_OPTS=-javaagent:{{ kafka_conf_dir }}/jolokia-jvm-agent.jar=port=8778,host=0.0.0.0 -Djava.security.auth.login.config={{ kafka_conf_dir }}/kafka_server_jaas.conf"
+Environment="JMX_PORT={{ kafka_jmx_port }}"

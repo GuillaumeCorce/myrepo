@@ -4,7 +4,7 @@
   copy : src="{{con_src}}" dest="{{tmp_dir}}"
 
 - name : Create directory for extract
-  file : path="{{tmp_dir}}/kafka" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0755 state=directory
+  file : path="{{tmp_dir}}/kafka" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0775 state=directory
 
 - name : Unarchive the Confluent file
   unarchive: src="{{tmp_dir}}/{{con_src}}" dest="{{tmp_dir}}/kafka" copy=no

@@ -1,0 +1,44 @@
+
+#Modification des droits sur les repertoires deja pris en compte
+
+- name : Create directory Zookeeper log
+  file : path="{{zoo_log_dir}}" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0774 state=directory recurse=yes
+
+- name : Create directory Zookeeper data
+  file : path="{{zoo_data_dir}}" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0774 state=directory recurse=yes
+
+- name : Create directory Zookeeper data
+  file : path="{{zoo_env_dir}}" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0774 state=directory recurse=yes
+
+- name : Create directory Zookeeper apps
+  file : path="{{kafka_apps_dir}}" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0774 state=directory recurse=yes
+
+
+
+
+# Configuration file
+
+- name : Configure Zookeeper Jaas file
+  template : src="zookeeper_server_jaas.conf.j2" dest="{{zoo_conf_dir}}/zookeeper_server_jaas.conf" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0774 backup=true
+  when : groups['zookeeper']|length > 1
+
+- name : Configure Zookeeper file
+  template : src="zookeeper.properties.j2" dest="{{zoo_conf_dir}}/zookeeper.properties" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0774 backup=true
+
+- name : Configure Zookeeper MyId file
+  template : src="myid.j2" dest="{{zoo_data_dir}}/myid" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0774 backup=true
+
+- name : Configure Zookeeper Log file 
+  template : src="log4j.properties.j2" dest="{{zoo_conf_dir}}/log4j.properties" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0774 backup=true
+
+- name : Configure Zookeeper init file
+  template: src="zookeeper-service.j2" dest="{{kafka_bin_dir}}/zookeeper-service" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0774 backup=true
+
+- name : Restart Zookeeper
+  command : "sh {{kafka_bin_dir}}/zookeeper-service reload"
+  become : yes
+  become_user : "{{kafka_user_data}}"
+
+
+
+

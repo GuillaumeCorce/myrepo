@@ -1,0 +1,42 @@
+#!/bin/sh
+echo "Starting creating topic"
+
+export JAVA_HOME=/bustools/jdk/current
+export KAFKA_OPTS=-Djava.security.auth.login.config="{{ kafka_conf_dir }}/kafka_server_jaas.conf"
+
+#read arguments from command line
+topic_name=$1
+partition=$2
+replication_factor=$3
+min_insync_replica=$4
+cleanup_policy=$5
+delete_retention=$6
+
+if [ "$#" -ne 6 ]; then
+  echo "One or more arguments is missing"
+  exit 1
+fi
+#replace var
+path_bin={{ kafka_bin_dir }}
+zookeeper_node={{ inventory_hostname }}
+zookeeper_port={{ kafka_zookeeper_port }}
+
+#create topic
+cleanup_args=""
+if [ "$cleanup_policy" = "delete" ]; then
+	cleanup_args="--config cleanup.policy=delete --config retention.ms=$delete_retention"
+else
+	cleanup_args="--config cleanup.policy=compact --config delete.retention.ms=$delete_retention"
+fi
+
+echo "executing creation topic command" $path_bin/kafka-topics --create --zookeeper $zookeeper_node:$zookeeper_port --topic $topic_name --partitions $partition --replication-factor $replication_factor --config min.insync.replicas=$min_insync_replica $cleanup_args
+	$path_bin/kafka-topics --create --zookeeper $zookeeper_node:$zookeeper_port --topic $topic_name --partitions $partition \
+		--replication-factor $replication_factor --config min.insync.replicas=$min_insync_replica $cleanup_args
+	result=$?; 
+	if [[ $result != 0 ]]; 
+	then 
+		echo "an error occured"
+		exit $result; 
+	fi
+echo "Topic has been created"
+exit 0

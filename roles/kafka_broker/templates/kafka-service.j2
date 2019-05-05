@@ -1,0 +1,159 @@
+#!/bin/bash
+#start the kafka daemon.
+
+# description: kafka
+export JAVA_HOME=/bustools/jdk/current
+export KAFKA_OPTS="-javaagent:{{ kafka_conf_dir }}/jolokia-jvm-agent.jar=port=8778,host=0.0.0.0 -Djava.security.auth.login.config={{ kafka_conf_dir }}/kafka_server_jaas.conf"
+export LOG_DIR={{ kafka_log_dir }}
+export KAFKA_JMX_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost"
+export JMX_PORT={{ kafka_jmx_port }}
+KAFKA_SCRIPT={{ kafka_bin_dir }}/kafka-server-start
+KAFKA_SCRIPT_STOP={{ kafka_bin_dir }}/kafka-server-stop
+KAFKA_CONFIG={{ kafka_conf_dir }}/server.properties
+KAFKA_CONSOLE_LOG={{ kafka_log_dir }}/console.log
+
+
+PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin
+
+
+prog=kafka
+DESC="kafka daemon"
+
+TIMESTAMP=$(date "+%Y%m%d-%H%M%S")
+RETVAL=0
+STARTUP_WAIT=30
+SHUTDOWN_WAIT=30
+
+KAFKA_PIDFILE={{ kafka_apps_dir }}/kafka.pid
+
+start() {
+  echo -n $"Starting $prog: "
+	# Create pid file
+        if [ -f $KAFKA_PIDFILE ]; then
+                read ppid < $KAFKA_PIDFILE
+                if [ `ps --pid $ppid 2> /dev/null | grep -c $ppid 2> /dev/null` -eq '1' ]; then
+                        echo -n "$prog is already running"
+                        echo failure
+                        return 1
+                else
+                      rm -f $KAFKA_PIDFILE
+                fi
+        fi
+
+        if [ -f $KAFKA_CONSOLE_LOG ]; then
+                mv $KAFKA_CONSOLE_LOG "$KAFKA_CONSOLE_LOG.$TIMESTAMP"
+        fi
+
+        # Run daemon
+        nohup $KAFKA_SCRIPT $KAFKA_CONFIG 2>&1 >> $KAFKA_CONSOLE_LOG 2>&1 &
+       
+        
+        count=0
+        launched=false
+  
+        until [ $count -gt $STARTUP_WAIT ]
+        do
+		touch $KAFKA_CONSOLE_LOG
+                grep 'started' $KAFKA_CONSOLE_LOG > /dev/null
+                if [ $? -eq 0 ] ; then
+                        launched=true
+                        break
+                fi
+		sleep 1
+                let count=$count+1;
+        done
+	PID=`ps aux | grep server.properties | grep -v grep | awk '{ print $2 }' `
+	echo $PID > $KAFKA_PIDFILE
+	if [ `ps --pid $PID 2> /dev/null | grep -c $PID 2> /dev/null` -eq '1' ]; then
+		echo success
+        return 0
+	else
+		rm $KAFKA_PIDFILE
+		echo failure
+		return 1
+	fi
+}
+
+
+stop() {
+        echo -n $"Stopping $prog: "
+        count=0;
+        let kwait=$SHUTDOWN_WAIT
+
+        if [ -f $KAFKA_PIDFILE ]; then
+                read kpid < $KAFKA_PIDFILE
+                $KAFKA_SCRIPT_STOP
+                until [ `ps --pid $kpid 2> /dev/null | grep -c $kpid 2> /dev/null` -eq "0" ] || [ $count -gt $kwait ]
+                do
+                        sleep 1
+                        let count=$count+1;
+                done
+				
+				if [ $count -gt $kwait ]; then
+							echo "error while stopping process"
+				fi
+		fi
+
+        if [ `ps aux | grep -v grep | grep -c server.properties` -ne '0' ]; then
+                echo failure
+                return 1
+	fi
+        
+        rm -f $KAFKA_PIDFILE    
+        mv $KAFKA_CONSOLE_LOG "$KAFKA_CONSOLE_LOG.$TIMESTAMP"
+		sleep 5
+        echo success
+}
+
+reload() {
+        stop
+        start
+}
+
+restart() {
+        stop
+        start
+}
+
+status() {
+        if [ -f $KAFKA_PIDFILE ]; then
+                read ppid < $KAFKA_PIDFILE
+                if [ `ps --pid $ppid 2> /dev/null | grep -c $ppid 2> /dev/null` -eq '1' ]; then
+                        echo "$prog is running (pid $ppid)"
+                        return 0
+                else
+                      echo "$prog dead but pid file exists"
+                        return 1
+                fi
+        fi
+        echo "$prog is not running"
+        return 3
+}
+
+case "$1" in
+start)
+        start
+        ;;
+
+stop)
+        stop
+        ;;
+
+reload)
+        reload
+        ;;
+
+restart)
+        restart
+        ;;
+
+status)
+        status
+        ;;
+*)
+
+echo $"Usage: $0 {start|stop|reload|restart|status}"
+exit 1
+esac
+  
+exit $?

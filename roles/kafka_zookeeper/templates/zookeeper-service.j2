@@ -1,0 +1,154 @@
+#! /bin/bash
+#start the zookeeper daemon.
+
+# description: zookeeper
+export JAVA_HOME=/bustools/jdk/current
+export KAFKA_OPTS=-Djava.security.auth.login.config="{{ zoo_conf_dir }}/zookeeper_server_jaas.conf"
+export KAFKA_JMX_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost"
+export JMX_PORT={{ kafka_zookeeper_jmx_port }}
+ZK_SCRIPT={{ kafka_bin_dir }}/zookeeper-server-start
+ZK_SCRIPT_STOP={{ kafka_bin_dir }}/zookeeper-server-stop
+ZK_CONFIG={{ zoo_conf_dir }}/zookeeper.properties
+ZK_CONSOLE_LOG={{ zoo_log_dir }}/console_zookeeper.log
+PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin
+
+prog=zookeeper
+DESC="zookeeper daemon"
+
+TIMESTAMP=$(date "+%Y%m%d-%H%M%S")
+RETVAL=0
+STARTUP_WAIT=30
+SHUTDOWN_WAIT=30
+
+ZK_PIDFILE={{ kafka_apps_dir }}/zookeeper.pid
+
+start() {
+  	echo -n $"Starting $prog: "
+    # Create pid file
+    if [ -f $ZK_PIDFILE ]; then
+    	read ppid < $ZK_PIDFILE
+    	if [ `ps --pid $ppid 2> /dev/null | grep -c $ppid 2> /dev/null` -eq '1' ]; then
+    	    echo -n "$prog is already running"
+    	    echo failure
+    	    return 1
+    	else
+    	  	rm -f $ZK_PIDFILE
+    	fi
+    fi
+	
+	if [ -f $ZK_CONSOLE_LOG ]; then
+        mv $ZK_CONSOLE_LOG "$ZK_CONSOLE_LOG.$TIMESTAMP"
+    fi	
+	
+	# Run daemon
+	nohup $ZK_SCRIPT $ZK_CONFIG 2>&1 >> $ZK_CONSOLE_LOG 2>&1 &
+	
+	count=0
+	launched=false
+  
+	until [ $count -gt $STARTUP_WAIT ]
+	do
+		grep 'binding to port' $ZK_CONSOLE_LOG > /dev/null
+		if [ $? -eq 0 ] ; then
+        	launched=true
+        	break
+		fi
+		sleep 1
+		let count=$count+1;
+	done
+	if [ $launched == "false" ] ; then
+		echo failure
+		exit 20
+	fi
+	PID=`ps aux | grep "zookeeper.properties$" | grep -v grep | awk '{ print $2 }' `
+	echo $PID > $ZK_PIDFILE
+	
+	echo success
+	return 0
+	
+}
+
+stop() {
+    echo -n $"Stopping $prog: "
+    count=0;
+	let kwait=$SHUTDOWN_WAIT	
+	
+	if [ -f $ZK_PIDFILE ]; then
+        read kpid < $ZK_PIDFILE
+		$ZK_SCRIPT_STOP
+        until [ `ps --pid $kpid 2> /dev/null | grep -c $kpid 2> /dev/null` -eq "0" ] || [ $count -gt $kwait ]
+        do
+            sleep 1
+        	let count=$count+1;
+        done
+
+		if [ $count -gt $kwait ]; then
+			echo "error while stopping process"
+		fi
+
+	fi	
+	if [ `ps aux | grep -v grep | grep -c zookeeper.properties` -ne '0' ]; then
+		echo failure
+        echo
+        return 1
+	fi
+
+    mv $ZK_CONSOLE_LOG "$ZK_CONSOLE_LOG.$TIMESTAMP"
+        
+	rm -f $ZK_PIDFILE
+	sleep 5
+    echo success
+}
+
+reload() {
+	stop
+	start
+}
+
+restart() {
+	stop
+	start
+}
+
+status() {
+	if [ -f $ZK_PIDFILE ]; then
+		read ppid < $ZK_PIDFILE
+		if [ `ps --pid $ppid 2> /dev/null | grep -c $ppid 2> /dev/null` -eq '1' ]; then
+			echo "$prog is running (pid $ppid)"
+			return 0
+		else
+			echo "$prog dead but pid file exists"
+			return 1
+		fi
+	fi
+	echo "$prog is not running"
+	return 3
+}
+
+case "$1" in
+start)
+	start
+	;;
+
+stop)
+	stop
+	;;
+
+reload)
+	reload
+	;;
+
+restart)
+	restart
+	;;
+
+status)
+	status
+	;;
+*)
+
+echo $"Usage: $0 {start|stop|reload|restart|status}"
+exit 1
+esac
+
+exit $?

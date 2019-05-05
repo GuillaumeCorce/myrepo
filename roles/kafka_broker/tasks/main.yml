@@ -1,0 +1,53 @@
+
+#Modification des droits sur les repertoires deja pris en compte
+
+- name : Create directory Broker log
+  file : path="{{kafka_log_dir}}" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0774 state=directory recurse=yes
+
+- name : Create directory Broker data
+  file : path="{{kafka_data_dir}}" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0774 state=directory recurse=yes
+
+- name : Create directory Broker data
+  file : path="{{kafka_env_dir}}" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0774 state=directory recurse=yes
+
+- name : Create directory Broker apps
+  file : path="{{kafka_apps_dir}}" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0774 state=directory recurse=yes
+
+- name : Copy the jolokia file
+  copy : src="jolokia-jvm-agent.jar" dest="/etc/kafka/jolokia-jvm-agent.jar" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0774
+
+# Configuration file
+
+- name : Configure Broker Jaas file
+  template : src="kafka_server_jaas.conf.j2" dest="{{kafka_conf_dir}}/kafka_server_jaas.conf" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0774 backup=true
+  when : groups['broker']|length > 1
+
+# Pas de jolokia
+
+- name : Configure Kafka console consumer
+  template : src="consumer.properties.j2" dest="{{kafka_conf_dir}}/consumer.properties" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0774 backup=true
+
+- name : Configure Kafka console producer
+  template : src="producer.properties.j2" dest="{{kafka_conf_dir}}/producer.properties" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0774 backup=true
+
+- name : Configure Kafka properties file
+  template : src="server.properties.j2" dest="{{kafka_conf_dir}}/myid" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0774 backup=true
+
+- name : Configure kafka Log file 
+  template : src="log4j.properties.j2" dest="{{kafka_conf_dir}}/log4j.properties" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0774 backup=true
+
+# Pas d'Aliases
+
+- name : Configure Broker service file
+  template: src="kafka-service.j2" dest="{{kafka_bin_dir}}/kafka-service" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0774 backup=true
+  notify :
+    - restart broker
+
+- name : Restart broker
+  command : "sh {{kafka_bin_dir}}/kafka-service reload"
+  become : yes
+  become_user : "{{kafka_user_data}}"
+
+
+
+

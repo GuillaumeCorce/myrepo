@@ -6,5 +6,5 @@
     mode : "install"
   - role : kafka_confluent
     mode : "install"
-#  - role : kafka_zookeeper
+  - role : kafka_zookeeper
 

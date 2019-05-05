@@ -1,0 +1,33 @@
+#!/bin/sh
+echo "Starting creating user"
+
+export JAVA_HOME=/bustools/jdk/current
+export KAFKA_OPTS=-Djava.security.auth.login.config="{{ kafka_conf_dir }}/kafka_server_jaas.conf"
+
+#read arguments from command line
+user_name=$1
+password=$2
+topic_name=$3
+
+if [ "$#" -ne 3 ]; then
+  echo "One or more arguments is missing"
+  exit 1
+fi
+#replace var from D4X
+path_bin={{ kafka_bin_dir }}
+zookeeper_node={{ inventory_hostname }}
+zookeeper_port={{ kafka_zookeeper_port }}
+
+#create user
+$path_bin/kafka-configs  --zookeeper $zookeeper_node:$zookeeper_port --alter --add-config 'SCRAM-SHA-512=[password='$password']' --entity-type users --entity-name $user_name
+
+echo "User $user_name has been created"
+
+echo "Starting adding ACLs"
+#add ACL write 
+$path_bin/kafka-acls --authorizer kafka.security.auth.SimpleAclAuthorizer --authorizer-properties zookeeper.connect=$zookeeper_node:$zookeeper_port --add --allow-principal User:$user_name --topic $topic_name --operation WRITE 
+$path_bin/kafka-acls --authorizer kafka.security.auth.SimpleAclAuthorizer --authorizer-properties zookeeper.connect=$zookeeper_node:$zookeeper_port --add --allow-principal User:$user_name --operation WRITE   --transactional-id '*'
+
+echo "ACLs have been added"
+
+exit 0

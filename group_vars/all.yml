@@ -1,8 +1,33 @@
+#M27 definition
 env : "d"
 trigram : "kfk"
 deployment_code : "mfg"
-kafka_user_data : "{{env}}{{trigram}}{{deployment_code}}0"
 kafka_user_app : "{{env}}{{trigram}}{{deployment_code}}a"
-Kafka_apps_dir : "/busapps/{{kafka_user_data}}/kafka"
-Kafka_data_dir : "/busapps/{{kafka_user_data}}/kafka/data"
+kafka_user_data : "{{env}}{{trigram}}{{deployment_code}}0"
+kafka_apps_dir : "/busapps/{{env}}{{trigram}}/{{deployment_code}}0/kafka"
+kafka_data_dir : "/busdata/{{env}}{{trigram}}/{{deployment_code}}0/kafka/data"
 
+#Global variable for Kafka
+kafka_bin_dir : "/usr/bin" 
+kafka_pid_dir : "/var/run"
+
+# Variables for Zookeeper
+zookeeper_leader_connection_port : 2888
+zookeeper_leader_election_port : 3888
+kafka_zookeeper_port : 2181
+kafka_zookeeper_jmx_port : 55556
+
+kafka_jaas_user_client : admin
+kafka_jaas_password_client : mypasswd
+
+
+#Variables for Broker
+kafka_listener_port : 9092
+kafka_listener_ssl_port : 9093
+kafka_jmx_port : 55555
+
+#Variable for registry
+kafka_registry_jmx_port : 55557
+
+#Others
+jolokia_version : "1.6.0"

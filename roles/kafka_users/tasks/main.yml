@@ -13,3 +13,15 @@
     shell : /bin/bash
     comment : kafka user for data
     groups : 
+
+- name : Set number of files that can be opened by Kafka
+  pam_limits: domain="{{kafka_user_app}}" limit_item="nofile" limit_type="-" comment="Kafka" value="100000"
+  
+- name : Set number of files that can be opened by Kafka
+  pam_limits: domain="{{kafka_user_data}}" limit_item="nofile" limit_type="-" comment="Kafka" value="100000"
+
+- name : Set number of files that can be opened by Kafka
+  pam_limits: domain="{{kafka_user_app}}" limit_item="nproc" limit_type="-" comment="Kafka" value="100000"
+  
+- name : Set number of files that can be opened by Kafka
+  pam_limits: domain="{{kafka_user_data}}" limit_item="nproc" limit_type="-" comment="Kafka" value="100000"

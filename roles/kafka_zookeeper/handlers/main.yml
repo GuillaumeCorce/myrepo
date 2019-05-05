@@ -1,0 +1,5 @@
+
+- name : restart Zookeeper
+  command : "sh {{kafka_apps_dir}}/bin/zookeeper-service reload"
+  become : yes
+  become_user : "{{kafka_user_data}}"
