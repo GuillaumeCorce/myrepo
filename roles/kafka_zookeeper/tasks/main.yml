@@ -39,6 +39,9 @@
   become : yes
   become_user : "{{kafka_user_data}}"
 
+#kafka-configs --zookeeper localhost:2181 --alter --add-config 'SCRAM-SHA-256=[password=mypasswd],SCRAM-SHA-512=[password=mypasswd]' --entity-type users --entity-name admin
+# https://docs.confluent.io/current/kafka/authentication_sasl/authentication_sasl_scram.html
+
 
 
 

@@ -31,7 +31,7 @@
   template : src="producer.properties.j2" dest="{{kafka_conf_dir}}/producer.properties" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0774 backup=true
 
 - name : Configure Kafka properties file
-  template : src="server.properties.j2" dest="{{kafka_conf_dir}}/myid" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0774 backup=true
+  template : src="server.properties.j2" dest="{{kafka_conf_dir}}/server.properties" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0774 backup=true
 
 - name : Configure kafka Log file 
   template : src="log4j.properties.j2" dest="{{kafka_conf_dir}}/log4j.properties" owner={{kafka_user_app}} group={{kafka_user_data}} mode=0774 backup=true
